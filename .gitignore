@@ -14,3 +14,5 @@ npm-debug.log*
 /src/generated/prisma
 
 /dev.db
+
+backend/src/generated/
