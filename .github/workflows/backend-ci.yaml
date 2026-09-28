@@ -85,3 +85,22 @@ jobs:
 
           # Realiza o merge da PR na branch dev
           gh pr merge "$PR_URL" --merge
+  # Job para gerar Tag automática quando a main for atualizada
+  create-tag:
+    name: Criar Tag de Versão
+    needs: validate-code
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Necessário para ler o histórico de tags anteriores
+
+      - name: Gerar Tag Automática
+        uses: anothrNick/github-tag-action@1.67.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+          DEFAULT_BUMP: patch 
