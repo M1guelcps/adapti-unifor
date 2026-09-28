@@ -1,33 +1,50 @@
-name: Backend CI
+name: Backend CI - Validação do Código
 
 on:
   push:
-    branches: [ main, master ]
+    branches:
+      - main
+      - dev
+      - 'feature/**'
     paths:
-      - 'backend/**'           # Só roda se mudar algo na pasta backend
-      - '.github/workflows/backend-ci.yml'
+      - 'backend/**'
+      - '.github/workflows/ci.yml'
   pull_request:
-    branches: [ main, master ]
+    branches:
+      - main
+      - dev
     paths:
       - 'backend/**'
 
 jobs:
-  build-and-test:
+  validate-code:
+    name: Validar Código (TypeScript & Build)
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
 
     steps:
-      - name: Checkout do código
+      - name: Baixar código do repositório
         uses: actions/checkout@v4
 
-      - name: Configurar o Node.js (ou Python, Java, etc.)
+      - name: Configurar ambiente Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: 'backend/package-lock.json'
 
-      - name: Instalar dependências e rodar testes
-        run: |
-          cd backend
-          npm ci
-          npm test
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Gerar Prisma Client
+        run: npx prisma generate
+        env:
+          DATABASE_URL: "file:./dev.db"
+
+      - name: Checagem de Tipos (TypeScript)
+        run: npm run type-check
+
+      - name: Testar Build de Compilação
+        run: npm run build

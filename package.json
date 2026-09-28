@@ -1,0 +1,36 @@
+{
+  "name": "adapti",
+  "version": "1.0.0",
+  "private": true,
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky"
+    
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/M1guelcps/adapti-unifor.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/M1guelcps/adapti-unifor/issues"
+  },
+  "homepage": "https://github.com/M1guelcps/adapti-unifor#readme",
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0"
+  },
+  "lint-staged": {
+    "backend/**/*.ts": [
+      "npm --prefix backend run lint",
+      "npm --prefix backend run type-check"
+    ]
+  }
+}
+  
+
