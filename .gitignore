@@ -11,8 +11,5 @@ npm-debug.log*
 .vscode/
 .DS_Store
 
-/src/generated/prisma
-
+**/src/generated/**
 /dev.db
-
-backend/src/generated/
