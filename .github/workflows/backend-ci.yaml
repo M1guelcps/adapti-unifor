@@ -1,4 +1,4 @@
-name: Backend CI - Validação do Código
+name: Backend CI - Validação e Auto Merge
 
 on:
   push:
@@ -15,6 +15,11 @@ on:
       - dev
     paths:
       - 'backend/**'
+
+# Permissões necessárias para o GitHub Actions criar PRs e fazer merges
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
   validate-code:
@@ -48,3 +53,35 @@ jobs:
 
       - name: Testar Build de Compilação
         run: npm run build
+
+  # Job que cria a PR e faz o merge automático apenas quando o push for em branch feature/**
+  auto-merge-dev:
+    name: Criar PR e Merge para dev
+    needs: validate-code
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/feature/')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar código do repositório
+        uses: actions/checkout@v4
+
+      - name: Criar PR e realizar Merge na branch dev
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH_ATUAL="${GITHUB_REF#refs/heads/}"
+          
+          # Verifica se já existe PR aberta para essa branch em direção à dev
+          PR_URL=$(gh pr list --head "$BRANCH_ATUAL" --base dev --json url -q '.[0].url')
+
+          # Se não existir, cria a PR
+          if [ -z "$PR_URL" ]; then
+            PR_URL=$(gh pr create \
+              --base dev \
+              --head "$BRANCH_ATUAL" \
+              --title "Auto PR: $BRANCH_ATUAL -> dev" \
+              --body "PR gerada automaticamente após sucesso nos testes de CI.")
+          fi
+
+          # Realiza o merge da PR na branch dev
+          gh pr merge "$PR_URL" --merge
